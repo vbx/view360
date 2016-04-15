@@ -29,12 +29,12 @@ var View360 = function (options) {
     var type = elm.tagName;
     var container = elm.parentNode;
     var canvas = undefined;
-    
+
     var camera, scene, renderer;
     var isUserInteracting = false,
-            lon = 0, 
-            lat = 0, 
-            phi = 0, 
+            lon = 0,
+            lat = 0,
+            phi = 0,
             theta = 0;
 
     var onDocumentMouseDown = function (event) {
@@ -97,21 +97,17 @@ var View360 = function (options) {
         camera.target.z = 500 * Math.sin(phi) * Math.sin(theta);
 
         camera.lookAt(camera.target);
-        
+
         // distortion
         //camera.position.copy( camera.target ).negate();
-         
+
         renderer.render(scene, camera);
     };
     var getTexture = function () {
         if (type == 'IMG') {
-            var texture = new THREE.Texture(elm);
-            // texture.crossOrigin = 'anonymous';
-            texture.image = elm;
-            texture.needsUpdate = true;
-            texture.minFilter = THREE.LinearFilter;
-            texture.format = THREE.RGBFormat;
-            return texture;
+            var t = new THREE.TextureLoader();
+            t.crossOrigin = 'anonymous';
+            return t.load(elm.src);
         }
 
         if (type == 'VIDEO') {
@@ -153,7 +149,7 @@ var View360 = function (options) {
         canvas.addEventListener('MozMousePixelScroll', onDocumentMouseWheel);
         elm.style.display = "none";
     };
-    
+
     plugin.animate = function () {
         requestAnimationFrame(plugin.animate);
         update();
@@ -166,7 +162,6 @@ var View360 = function (options) {
     plugin.registerReady = function () {
         var start = function () {
             plugin.init();
-            //View360.instances[i].addBtn();
             plugin.animate();
         };
         if (type == 'IMG') {
@@ -178,23 +173,23 @@ var View360 = function (options) {
     };
 };
 View360.instances = [];
-View360.autoDiscover = true;
 View360.initialise = function (arg) {
     var elements = [];
-    if(typeof(arg) === 'undefined') {
-        elements = document.getElementsByClassName('view360');
-    }
-    else if( typeof(arg) === 'string' ) {
-        if(arg[0]=='.') {
+    if (typeof (arg) === 'undefined') {
+        if (View360.autoDiscover !== false) {
+            elements = document.getElementsByClassName('view360');
+        }
+    } else if (typeof (arg) === 'string') {
+        if (arg[0] == '.') {
             elements = document.getElementsByClassName(arg.substr(1));
         }
-        if(arg[0]=='#') {
+        if (arg[0] == '#') {
             elements = [document.getElementById(arg.substr(1))];
         }
-    }else if( typeof(arg) === 'object' ) {
+    } else if (typeof (arg) === 'object') {
         elements = [arg[0]];
     }
-    
+
     for (var i = 0; i < elements.length; i++) {
         View360.instances[i] = new View360({element: elements[i]})
         View360.instances[i].registerReady();
@@ -202,9 +197,6 @@ View360.initialise = function (arg) {
 };
 (function (View360) {
     document.addEventListener('DOMContentLoaded', function () {
-        if (View360.autoDiscover == false) {
-            return;
-        }
         View360.initialise();
     });
 })(View360);
